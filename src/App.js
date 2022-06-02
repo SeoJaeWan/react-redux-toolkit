@@ -1,23 +1,63 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addTodos, removeTodos, toggleTodos } from "./modules/todos";
+
+const TodoItem = ({ todo, onToggleHandler, onRemoveHandler }) => {
+  return (
+    <div>
+      <input
+        type="checkbox"
+        onClick={() => onToggleHandler()}
+        checked={todo.done}
+        readOnly={true}
+      />
+      <span style={{ textDecoration: todo.done ? "line-through" : "none" }}>
+        {todo.text}
+      </span>
+      <button onClick={() => onRemoveHandler()}>삭제</button>
+    </div>
+  );
+};
 
 function App() {
+  const { todos } = useSelector((state) => state.todos);
+
+  const [inputText, setInputText] = useState("");
+
+  const dispatch = useDispatch();
+
+  const onSubmitHandler = (e) => {
+    e.preventDefault();
+    dispatch(addTodos(inputText));
+    setInputText("");
+  };
+
+  console.log(todos);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <form onSubmit={onSubmitHandler}>
+        <input
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+        />
+        <button type="submit">추가</button>
+      </form>
+
+      <hr />
+
+      {todos?.map((data, idx) => {
+        return (
+          <TodoItem
+            key={idx}
+            todo={data}
+            onToggleHandler={() => {
+              dispatch(toggleTodos(idx));
+            }}
+            onRemoveHandler={() => dispatch(removeTodos(idx))}
+          />
+        );
+      })}
     </div>
   );
 }
